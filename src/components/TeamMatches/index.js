@@ -1,8 +1,10 @@
 // Write your code here
 import {Component} from 'react'
 import Loader from 'react-loader-spinner'
+import {Link} from 'react-router-dom'
 import LatestMatch from '../LatestMatch'
 import MatchCard from '../MatchCard'
+import PieChart from '../PieChart'
 import './index.css'
 
 const teamMatchesApiUrl = 'https://apis.ccbp.in/ipl/'
@@ -73,10 +75,23 @@ class TeamMatches extends Component {
     )
   }
 
+  getNoOfMatches = value => {
+    const {recentMatchesData} = this.state
+    const {latestMatch, recentMatches} = recentMatchesData
+    const currentMatch = value === latestMatch.matchStatus ? 1 : 0
+    const result =
+      recentMatches.filter(match => match.matchStatus === value).length +
+      currentMatch
+    return result
+  }
+
+  generatePieChartData = () => [
+    {name: 'Won', value: this.getNoOfMatches('Won')},
+    {name: 'Lost', value: this.getNoOfMatches('Lost')},
+    {name: 'Drawn', value: this.getNoOfMatches('Drawn')},
+  ]
+
   renderTeamMatches = () => {
-    const {match} = this.props
-    const {params} = match
-    const {id} = params
     const {recentMatchesData} = this.state
     const {teamBannerUrl, latestMatch} = recentMatchesData
 
@@ -84,13 +99,20 @@ class TeamMatches extends Component {
       <div className="team-matches-container">
         <img src={teamBannerUrl} className="team-banner" alt="team banner" />
         <LatestMatch latestMatchData={latestMatch} />
+        <h1 className="latest-match-heading mt-3">Team Statistics</h1>
+        <PieChart data={this.generatePieChartData()} />
         {this.renderRecentMatchesList()}
+        <Link to="/">
+          <button type="button" className="btn btn-outline-info mb-2">
+            Back
+          </button>
+        </Link>
       </div>
     )
   }
 
   renderLoader = () => (
-    <div testid="loader" className="loader-container">
+    <div data-testid="loader" className="loader-container">
       <Loader type="Oval" color="#ffffff" height="50" />
     </div>
   )
